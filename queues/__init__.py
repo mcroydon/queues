@@ -20,7 +20,7 @@ Other backends that might be worth checking out
 * http://code.google.com/p/stomperl/
 * RabbitMQ
 """
-import os
+import os, inspect
 
 __version__ = "0.6.2"
 
@@ -58,6 +58,5 @@ except ImportError, e:
         raise InvalidBackend("Unable to import QUEUE BACKEND '%s'" % BACKEND)
     # Check that this is really a queues backend, not just some other random
     # module.
-    from .backends.base import BaseQueue
-    if not getattr(queues, 'Queue', None) in BaseQueue.__subclasses__():
-        raise InvalidBackend("Unable to import QUEUE_BACKEND '%s' does not appear to be valid." % BACKEND)
+    if not inspect.isclass(getattr(queues, 'Queue', None)):
+        raise InvalidBackend("Unable to import QUEUE BACKEND '%s' does not appear to be valid." % BACKEND)
