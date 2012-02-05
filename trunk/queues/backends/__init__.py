@@ -25,3 +25,6 @@ except ImportError, e:
         backend = __import__(BACKEND, {}, {}, [''])
     except ImportError:
         raise InvalidBackend("Unable to import QUEUE BACKEND '%s'" % BACKEND)
+    from .base import BaseQueue
+    if not getattr(backend, 'Queue', None) in BaseQueue.__subclasses__():
+        raise InvalidBackend("Unable to import QUEUE BACKEND '%s' does not appear to be valid." % BACKEND)
