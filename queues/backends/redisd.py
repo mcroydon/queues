@@ -19,9 +19,11 @@ try:
     from django.conf import settings
     CONN = getattr(settings, 'QUEUE_REDIS_CONNECTION', None)
     DB = getattr(settings, 'QUEUE_REDIS_DB', None)
+    TIMEOUT = getattr(settings, 'QUEUE_REDIS_TIMEOUT', None)
 except:
     CONN = os.environ.get('QUEUE_REDIS_CONNECTION', None)
     DB = os.environ.get('QUEUE_REDIS_DB', None)
+    TIMEOUT = os.environ.get('QUEUE_REDIS_TIMEOUT', None)
 
 if not CONN:
     raise InvalidBackend("QUEUE_REDIS_CONNECTION not set.")
@@ -36,11 +38,22 @@ try:
 except ValueError:
     raise InvalidBackend("Port portion of QUEUE_REDIS_CONNECTION should be an integer.")
 
-def _get_connection(host=host, port=port, db=DB):
+def _get_connection(host=host, port=port, db=DB, timeout=TIMEOUT):
     kwargs = {'host' : host, 'port' : port}
     if DB:
         kwargs['db'] = DB
-    return redis.Redis(**kwargs)
+    if timeout:
+        kwargs['timeout'] = float(timeout)
+    try:
+        # Try using the "official" redis kwargs
+        return redis.Redis(**kwargs)
+    except TypeError, e:
+        # Possibly 'timeout' caused an issue...
+        if 'timeout' not in kwargs:
+            raise
+        # Try using Andy McCurdy's library
+        kwargs['socket_timeout'] = kwargs.pop('timeout')
+        return redis.Redis(**kwargs)
 
 class Queue(BaseQueue):
     def __init__(self, name):
