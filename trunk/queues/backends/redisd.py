@@ -60,9 +60,6 @@ class Queue(BaseQueue):
         try:            
             self.name = name
             self.backend = 'redis'
-            kwargs = {'host' : host, 'port' : int(port)}
-            if DB:
-                kwargs['db'] = DB
             self._connection = _get_connection()
         except redis.RedisError, e:
             raise QueueException, "%s" % e
