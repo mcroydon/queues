@@ -1,4 +1,4 @@
-import os
+import os, inspect
 from queues import InvalidBackend
 
 __all__ = ['backend']
@@ -25,6 +25,5 @@ except ImportError, e:
         backend = __import__(BACKEND, {}, {}, [''])
     except ImportError:
         raise InvalidBackend("Unable to import QUEUE BACKEND '%s'" % BACKEND)
-    from .base import BaseQueue
-    if not getattr(backend, 'Queue', None) in BaseQueue.__subclasses__():
+    if not inspect.isclass(getattr(backend, 'Queue', None)):
         raise InvalidBackend("Unable to import QUEUE BACKEND '%s' does not appear to be valid." % BACKEND)
