@@ -64,11 +64,16 @@ class Queue(BaseQueue):
         except redis.RedisError, e:
             raise QueueException, "%s" % e
 
-    def read(self):
+    def read(self, block=False):
         try:
-            return self._connection.lpop(self.name)
+            if block:
+                m = self._connection.blpop(self.name)
+            else:
+                m = self._connection.lpop(self.name)
+            if m is None:
+                raise QueueException('Queue is empty')
         except redis.RedisError, e:
-            raise QueueException, "%s" % e
+            raise QueueException(str(e))
 
     def write(self, value):
         try:

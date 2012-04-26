@@ -20,9 +20,9 @@ class Queue(BaseQueue):
         self.backend = 'dummy'
         self.name = name
 
-    def read(self):
+    def read(self, block=False):
         try:
-            message = self.queue.get(block=False)
+            message = self.queue.get(block=block)
             self.queue.task_done()
             return message
         except queue.Empty, e:

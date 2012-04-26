@@ -9,13 +9,9 @@ from queues import InvalidBackend, QueueException
 import os, re
 
 try:
-    from cmemcache import Client
-    
-except ImportError:
-    try:
-        from memcache import Client
-    except:
-        raise InvalidBackend("Unable to import a memcache library.")
+    import memcache
+except:
+    raise InvalidBackend("Unable to import a memcache library.")
 
 try:
     from django.conf import settings
@@ -27,13 +23,14 @@ if not CONN:
     raise InvalidBackend("QUEUE_MEMCACHE_CONNECTION not set.")
 
 class Queue(BaseQueue):
-    
     def __init__(self, name):
-        self._connection = Client(CONN.split(';'))
+        self._connection = memcache.Client(CONN.split(';'))
         self.backend = 'memcached'
         self.name = name
 
-    def read(self):
+    def read(self, block=False):
+        if block:
+            raise NotImplemented('Memcached cannot perform a blocking read.')
         try:
             return self._connection.get(self.name)
         except (memcache.MemcachedKeyError, MemcachedStringEncodingError), e:

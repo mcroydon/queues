@@ -40,10 +40,12 @@ class Queue(BaseQueue):
         if not self._queue:
             self._queue = self._connection.create_queue(name)
 
-    def read(self):
+    def read(self, block=False):
+        if block:
+            raise NotImplemented('SQS cannot performing a blocking read.')
         try:
             m = self._queue.read()
-            if not m:
+            if m is None:
                 return None
             else:
                 self._queue.delete()
