@@ -64,10 +64,10 @@ class Queue(BaseQueue):
         except redis.RedisError, e:
             raise QueueException, "%s" % e
 
-    def read(self, block=False):
+    def read(self, block=False, timeout=0):
         try:
             if block:
-                m = self._connection.blpop(self.name)
+                m = self._connection.blpop(self.name, timeout=timeout)
             else:
                 m = self._connection.lpop(self.name)
             if m is None:
