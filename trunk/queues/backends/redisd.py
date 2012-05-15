@@ -7,6 +7,7 @@ Requires redis.py from the redis source (found in client-libraries/python).
 from queues.backends.base import BaseQueue
 from queues import InvalidBackend, QueueException
 import os
+import math
 
 try:
     import redis
@@ -67,7 +68,9 @@ class Queue(BaseQueue):
     def read(self, block=False, timeout=0):
         try:
             if block:
-                m = self._connection.blpop(self.name, timeout=timeout)
+                # Redis requires an integer, so round a float UP to the nearest
+                # int (0.1 -> 1).
+                m = self._connection.blpop(self.name, timeout=int(math.ceil(timeout)))
             else:
                 m = self._connection.lpop(self.name)
             if m is None:
