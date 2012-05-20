@@ -75,6 +75,7 @@ class Queue(BaseQueue):
                 m = self._connection.lpop(self.name)
             if m is None:
                 raise QueueException('Queue is empty')
+            return m
         except redis.RedisError, e:
             raise QueueException(str(e))
 
