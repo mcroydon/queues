@@ -70,7 +70,10 @@ class Queue(BaseQueue):
             if block:
                 # Redis requires an integer, so round a float UP to the nearest
                 # int (0.1 -> 1).
-                m = self._connection.blpop(self.name, timeout=int(math.ceil(timeout)))
+                try:
+                    m = self._connection.blpop(self.name, timeout=int(math.ceil(timeout)))[1]
+                except TypeError:
+                    m = None
             else:
                 m = self._connection.lpop(self.name)
             if m is None:
